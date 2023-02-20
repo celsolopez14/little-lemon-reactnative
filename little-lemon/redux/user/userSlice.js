@@ -2,10 +2,17 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     user : {
-        name:'',
-        email:'',
+        name:null,
+        email:null,
+        phoneNumber:null,
         isSignedIn:false,
-        isLoading:true
+        isLoading:true,
+        profileImage:null,
+        userNotifications:{
+            PasswordChanges:false,
+            OrderStatuses:false,
+            SpecialOffers:false  
+        }
     }
 }
 
@@ -14,45 +21,52 @@ export const userSlice = createSlice({
     initialState,
     reducers:{
         saveName:(state, action) =>{
-            state.user = {
-                ...state.user,
-                name:action.payload
-            } 
+            state.user.name = action.payload 
             
         },
         saveEmail:(state, action) =>{
-            state.user = {
-                ...state.user,
-                email:action.payload
-            }
+            state.user.email = action.payload
             
         },
-        saveUser:(state, action) =>{
-            state.user = {
-                ...state.user,
-                name: action.payload.name,
-                email: action.payload.email
-            }
+        savePhoneNumber:(state, action) =>{
+            state.user.phoneNumber = action.payload
+            
+        },
+        saveProfileImage:(state, action) =>{
+            state.user.profileImage = action.payload
             
         },
         
         signIn:(state, action) =>{
-            state.user ={
-                ...state.user,
-                isSignedIn:action.payload
-            }
+            state.user.isSignedIn = action.payload
         },
 
         isLoading:(state, action) =>{
-            state.user ={
-                ...state.user,
-                isLoading:action.payload
-            }
+            state.user.isLoading = action.payload
+        },
+
+        saveUserNotifications:(state, action) =>{
+            state.user.userNotifications = action.payload
+        },
+        signOut:(state) =>{
+            state.user =  {
+                name:null,
+                email:null,
+                phoneNumber:null,
+                isSignedIn:false,
+                isLoading:true,
+                profileImage:null,
+                userNotifications:{
+                    PasswordChanges:false,
+                    OrderStatuses:false,
+                    SpecialOffers:false  
+                }
+            } 
         }
     },
 
 })
 
-export const {isLoading, saveUser, signIn} = userSlice.actions
+export const {isLoading, savePhoneNumber, signIn, saveProfileImage, saveEmail, saveName, saveUserNotifications, signOut} = userSlice.actions
 
 export default userSlice.reducer

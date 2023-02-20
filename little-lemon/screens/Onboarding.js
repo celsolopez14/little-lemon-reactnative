@@ -11,7 +11,8 @@ import {
     Platform
 } from "react-native"
 import { useSelector, useDispatch } from 'react-redux';
-import { saveUser, signIn, stopLoading } from '../redux/user/userSlice';
+import { saveEmail, saveName, saveUser, signIn, stopLoading } from '../redux/user/userSlice';
+import { nameValidation, emailValidation } from '../validation';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -19,7 +20,6 @@ export function OnboardingScreen() {
     const [name, setName] = React.useState('');
     const [email, setEmail] = React.useState('');
     const dispatch = useDispatch()
-    const {user} = useSelector(state => state.user)
     
 
     
@@ -34,37 +34,15 @@ export function OnboardingScreen() {
             try{
                 await AsyncStorage.multiSet([namePair, emailPair])
                 Alert.alert('Thanks for loggin in!')
-                let userResult = {
-                    name:name,
-                    email:email
-                }
-                dispatch(saveUser(userResult))
+                dispatch(saveName(name))
+                dispatch(saveEmail(email))
                 dispatch(signIn(true))
             } catch(e){
                 console.error(e)
             }
         })();
     }
-
-    const emailValidation = (email) => {
-        var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-
-        if (email.match(validRegex)) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    const nameValidation = (name) => {
-        var validRegex = /^[A-Za-z]+$/;
-
-        if (name.match(validRegex) && name.length > 1) {
-            return true
-        } else {
-            return false
-        }
-    }
+ 
 
     return (
 
