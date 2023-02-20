@@ -12,7 +12,8 @@ export function SplashScreen() {
 
     const onLayout = async () =>{
         try{
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log(user.name)
             if(user.name !== null && user.email !== null){
                 dispatch(signIn(true))
             }

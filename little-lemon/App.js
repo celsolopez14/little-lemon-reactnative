@@ -8,7 +8,7 @@ import { store } from './redux/store'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
-import { saveUser } from './redux/user/userSlice';
+import { saveEmail, saveName, savePhoneNumber, saveProfileImage, saveUserNotifications } from './redux/user/userSlice';
 import { SplashScreen } from './screens/Splash';
 
 
@@ -27,15 +27,18 @@ function App() {
     (async () => {
       try {
         if (!(user.isSignedIn)) {
-          const result = await AsyncStorage.multiGet(["App_User_name", "App_User_email"]);
+          const result = await AsyncStorage.multiGet(["App_User_name", "App_User_email","App_User_phoneNumber", "App_User_profileImage", "App_User_UserNotificationOrderStatuses", "App_User_UserNotificationPasswordChanges", "App_User_UserNotificationSpecialOffers" ]);
           if (result !== null) {
-            userResult = {
-              name: result[0][1],
-              email: result[1][1]
-
-            }
-            dispatch(saveUser(userResult))
-
+            dispatch(saveName(result[0][1]));
+            dispatch(saveEmail(result[1][1]));
+            dispatch(savePhoneNumber(result[2][1]));
+            dispatch(saveProfileImage(result[3][1]));
+            let newUserNotifications = {
+              OrderStatuses: JSON.parse(result[4][1]),
+              PasswordChanges: JSON.parse(result[5][1]),
+              SpecialOffers: JSON.parse(result[6][1])
+            };
+            dispatch(saveUserNotifications(newUserNotifications)); 
           }
         } else {
           await new Promise(resolve => setTimeout(resolve, 1000));
