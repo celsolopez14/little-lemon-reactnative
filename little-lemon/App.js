@@ -10,6 +10,7 @@ import * as React from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { saveEmail, saveName, savePhoneNumber, saveProfileImage, saveUserNotifications } from './redux/user/userSlice';
 import { SplashScreen } from './screens/Splash';
+import { HomeScreen } from './screens/Home';
 
 
 const Stack = createNativeStackNavigator();
@@ -26,7 +27,7 @@ function App() {
 
     (async () => {
       try {
-        if (!(user.isSignedIn)) {
+        
           const result = await AsyncStorage.multiGet(["App_User_name", "App_User_email","App_User_phoneNumber", "App_User_profileImage", "App_User_UserNotificationOrderStatuses", "App_User_UserNotificationPasswordChanges", "App_User_UserNotificationSpecialOffers" ]);
           if (result !== null) {
             dispatch(saveName(result[0][1]));
@@ -40,9 +41,9 @@ function App() {
             };
             dispatch(saveUserNotifications(newUserNotifications)); 
           }
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+        
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        
 
 
       } catch (e) {
@@ -63,9 +64,11 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ header: () => null }}>
 
-        {user.isSignedIn ? (<Stack.Screen name="Profile" component={ProfileScreen} />
-
-        )
+        { user.isSignedIn ? 
+          (<>
+            <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Profile" component={ProfileScreen} />
+            </>)
           : (<Stack.Screen name="Onboarding" component={OnboardingScreen} />
           )}
       </Stack.Navigator>
@@ -73,7 +76,7 @@ function App() {
 
 
 
-  );
+  ); 
 }
 
 export default () => {
