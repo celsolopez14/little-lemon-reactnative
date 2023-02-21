@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { View, Text, StyleSheet, Pressable, Image, TextInput, ScrollView, Alert } from "react-native";
 import { useSelector, useDispatch } from 'react-redux';
-import { signIn, saveEmail, saveName, saveProfileImage, savePhoneNumber, saveUserNotifications } from "../redux/user/userSlice";
+import { saveEmail, saveName, saveProfileImage, savePhoneNumber, saveUserNotifications, signOut } from "../redux/user/userSlice";
 import BouncyCheckbox from "react-native-bouncy-checkbox";
 import { MaskedTextInput } from "react-native-mask-text";
 import * as React from 'react'
@@ -10,7 +10,7 @@ import { nameValidation, emailValidation } from "../validation";
 import UserAvatar from 'react-native-user-avatar';
 
 
-export function ProfileScreen() {
+export function ProfileScreen({navigation}) {
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.user);
     const [fname, setFName] = React.useState('');
@@ -28,6 +28,7 @@ export function ProfileScreen() {
         setLName(user.name.split(' ')[1])
         setImage(user.profileImage)
         
+        
       }, []);
     async function onPressLogOut() {
         try {
@@ -36,7 +37,7 @@ export function ProfileScreen() {
         } catch (e) {
             console.error(e);
         } finally{
-            dispatch(signIn(false))
+            dispatch(signOut())
             console.log('Done')
         }
         
@@ -53,6 +54,18 @@ export function ProfileScreen() {
         if (!result.canceled) {
             setImage(result.assets[0].uri)
         }
+    }
+
+    function removeImage() {
+        setImage(null);
+    }
+
+    function discardChanges() {
+        setImage(user.profileImage);
+        setPNum(user.phoneNumber)
+        setEmail(user.email)
+        setFName(user.name.split(' ')[0])
+        setLName(user.name.split(' ')[1])
     }
 
     async function saveChanges() {
@@ -78,8 +91,14 @@ export function ProfileScreen() {
             }
         }
         if (user.profileImage != image) {
-            dispatch(saveProfileImage(image))
-            changesArray.push(["App_User_profileImage", image]);
+            if(image === null){
+                await AsyncStorage.removeItem("App_User_profileImage")
+                dispatch(saveProfileImage(image))
+
+            } else{
+                dispatch(saveProfileImage(image))
+                changesArray.push(["App_User_profileImage", image]);
+            }
         }
         if (user.phoneNumber != pnum) {
             dispatch(savePhoneNumber(pnum))
@@ -91,23 +110,28 @@ export function ProfileScreen() {
             changesArray.push(["App_User_UserNotificationPasswordChanges", String(userNotifications.PasswordChanges)]);
             changesArray.push(["App_User_UserNotificationSpecialOffers", String(userNotifications.SpecialOffers)]);
         }
-        
-        try {
+        if(changesArray.length>0){
+            try {
             
-            await AsyncStorage.multiSet(changesArray)
-            
-        } catch (e) {
-            console.error(e)
-        } finally {
-            Alert.alert('Profile information updated!');
-        }
+                await AsyncStorage.multiSet(changesArray)
+                
+            } catch (e) {
+                console.error(e)
+            }
+
+        } 
+        Alert.alert('Profile information updated!');
     }
 
 
     return (
         <View style={profileScreenStyle.container}>
             <View style={profileScreenStyle.header}>
-                <Pressable style={profileScreenStyle.backButton} >
+                <Pressable 
+                onPress={() =>{
+                    navigation.navigate('Home')
+                }}
+                style={profileScreenStyle.backButton} >
                     <Text style={profileScreenStyle.buttonText} >Back</Text>
                 </Pressable>
                 <Image
@@ -122,7 +146,7 @@ export function ProfileScreen() {
                 <View style={profileScreenStyle.avatarContainer}>
                     {image ? <Image
                         style={{ height: 70, width: 70, resizeMode: 'contain', borderRadius: 50, marginHorizontal: 10 }}
-                        source={{ uri: image }} /> : <UserAvatar size={100} name={user.name} bgColor='#fbec52' textColor='#000000'/> }
+                        source={{ uri: image }} /> : <UserAvatar size={100} name={user.name} bgColor='#F4CE14' textColor='#000000'/> }
                     <Pressable onPress={pickImage}
                         style={({ pressed }) => [
                             {
@@ -138,7 +162,7 @@ export function ProfileScreen() {
                         ]} >
                         <Text style={profileScreenStyle.buttonText} >Change</Text>
                     </Pressable>
-                    <Pressable style={({ pressed }) => [
+                    <Pressable onPress={removeImage} style={({ pressed }) => [
                         {
                             borderWidth: 1,
                             alignItems: 'center',
@@ -195,7 +219,7 @@ export function ProfileScreen() {
                     style={{ margin: 10 }}
                     onPress={(isChecked) => setUserNotifications((prevState) =>({
                         ...prevState,
-                        OrderStatuses:!prevState['OrderStatuses'],
+                        OrderStatuses:isChecked,
                     }))}
                 />
                 <BouncyCheckbox
@@ -206,7 +230,7 @@ export function ProfileScreen() {
                     style={{ margin: 10 }}
                     onPress={(isChecked) => setUserNotifications((prevState) =>({
                         ...prevState,
-                        SpecialOffers:!prevState['SpecialOffers'],
+                        SpecialOffers:isChecked,
                     }))}
                     
                 />
@@ -218,7 +242,7 @@ export function ProfileScreen() {
                     style={{ margin: 10 }}
                     onPress={(isChecked) => setUserNotifications((prevState) =>({
                         ...prevState,
-                        PasswordChanges:!prevState['PasswordChanges'],
+                        PasswordChanges:isChecked,
                     }))}
                     
                 />
@@ -242,7 +266,7 @@ export function ProfileScreen() {
                     <Text style={profileScreenStyle.buttonText} >Log out</Text>
                 </Pressable>
                 <View style={profileScreenStyle.footerSubContainer}>
-                    <Pressable style={({ pressed }) => [
+                    <Pressable onPress={discardChanges} style={({ pressed }) => [
                         {
                             borderWidth: 1,
                             alignItems: 'center',
@@ -296,6 +320,7 @@ const profileScreenStyle = StyleSheet.create({
 
         flexDirection: 'row',
         backgroundColor: '#c7ddb5',
+        margin:10
     },
     inputsContainer: {
         flex: 0.8,

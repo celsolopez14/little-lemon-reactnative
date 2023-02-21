@@ -46,7 +46,10 @@ export const userSlice = createSlice({
         },
 
         saveUserNotifications:(state, action) =>{
-            state.user.userNotifications = action.payload
+            state.user.userNotifications.OrderStatuses = action.payload.OrderStatuses
+            state.user.userNotifications.PasswordChanges = action.payload.PasswordChanges
+            state.user.userNotifications.SpecialOffers = action.payload.SpecialOffers
+
         },
         signOut:(state) =>{
             state.user =  {
