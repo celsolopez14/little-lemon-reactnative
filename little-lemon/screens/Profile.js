@@ -32,8 +32,7 @@ export function ProfileScreen({navigation}) {
       }, []);
     async function onPressLogOut() {
         try {
-            let keys = await AsyncStorage.getAllKeys();
-            await AsyncStorage.multiRemove(keys);
+            await AsyncStorage.clear();
         } catch (e) {
             console.error(e);
         } finally{
